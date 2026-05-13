@@ -3,6 +3,7 @@ const state = { trees: {}, activeTree: null };
 const treeNameInput = document.getElementById("treeName");
 const createTreeBtn = document.getElementById("createTreeBtn");
 const treeSelect = document.getElementById("treeSelect");
+const saveTreeBtn = document.getElementById("saveTreeBtn");
 const personForm = document.getElementById("personForm");
 const relationType = document.getElementById("relationType");
 const spouseTarget = document.getElementById("spouseTarget");
@@ -30,10 +31,33 @@ const areSiblings = (a, b) => a.parents.some((pid) => b.parents.includes(pid));
 
 function option(el, value, text) { const o = document.createElement("option"); o.value = value; o.textContent = text; el.appendChild(o); }
 
+
+const STORAGE_KEY = "dynasty_family_tree_state_v1";
+
+function persistTrees() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.trees));
+}
+
+function loadPersistedTrees() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      state.trees = parsed;
+      const names = Object.keys(state.trees);
+      state.activeTree = names[0] || null;
+    }
+  } catch {
+    // ignore broken local storage payload
+  }
+}
+
 function createTree(name) {
   if (!name || state.trees[name]) return;
   state.trees[name] = { people: [] };
   state.activeTree = name;
+  persistTrees();
   refreshAll();
 }
 
@@ -293,6 +317,7 @@ personForm.addEventListener("submit", async (e) => {
 
   personForm.reset();
   toggleRelationFields();
+  persistTrees();
   refreshAll();
 });
 
@@ -305,6 +330,7 @@ editForm.addEventListener("submit", async (e) => {
   person.familyName = editFamily.value.trim() || person.familyName;
   person.gender = editGender.value;
   if (editImage.files[0]) person.image = await fileToDataUrl(editImage.files[0]);
+  persistTrees();
   refreshAll();
 });
 
@@ -321,7 +347,16 @@ deletePersonBtn.addEventListener("click", () => {
     p.children = p.children.filter((cid) => cid !== id);
   });
   editForm.reset();
+  persistTrees();
   refreshAll();
 });
 
+saveTreeBtn.addEventListener("click", () => {
+  if (!state.activeTree) return alert("Select an active tree to save.");
+  persistTrees();
+  alert(`Tree "${state.activeTree}" saved permanently in this browser.`);
+});
+
+loadPersistedTrees();
+refreshAll();
 toggleRelationFields();
