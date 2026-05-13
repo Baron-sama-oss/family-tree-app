@@ -1,0 +1,52 @@
+:root {
+  --bg: #060606;
+  --panel: #121212;
+  --text: #f8ebc6;
+  --muted: #baa57a;
+  --bronze: #8c6239;
+  --gold: #d4af37;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  color: var(--text);
+  background: radial-gradient(circle at top, #171717 0%, #050505 55%, #000 100%);
+  font-family: "Georgia", "Times New Roman", serif;
+}
+
+header, .panel {
+  background: linear-gradient(145deg, #101010, #060606);
+  border: 1px solid var(--bronze);
+  border-radius: 12px;
+}
+header { margin: 1rem; padding: 1rem 1.5rem; }
+header h1 { margin: 0; letter-spacing: 1px; }
+header p { margin: .5rem 0 0; color: var(--muted); font-style: italic; }
+
+main { padding: 0 1rem 1rem; display: grid; gap: 1rem; }
+.panel { padding: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.panel h2 { margin-top: 0; }
+
+.row, .grid { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; }
+.grid label { display: flex; flex-direction: column; gap: .25rem; min-width: 170px; }
+
+input, select, button {
+  border-radius: 8px;
+  border: 1px solid #5c472d;
+  background: #0f0f0f;
+  color: var(--text);
+  padding: .55rem;
+}
+button {
+  background: linear-gradient(180deg, #88652f, #62451c);
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+button:hover { transform: translateY(-1px); box-shadow: 0 0 14px rgba(212,175,55,.25); }
+
+.graph-panel { overflow-x: auto; }
+.tree-graph svg { min-width: 100%; }
+
+.node-card { transition: transform .2s ease; }
+.node-card:hover { transform: scale(1.02); }
