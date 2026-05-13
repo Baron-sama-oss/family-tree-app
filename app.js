@@ -86,6 +86,7 @@ function toggleRelationFields() {
 function computeLevels(people) {
   const byId = new Map(people.map((p) => [p.id, p]));
   const level = {};
+
   function setLevel(id) {
     if (level[id] !== undefined) return level[id];
     const person = byId.get(id);
@@ -93,7 +94,29 @@ function computeLevels(people) {
     level[id] = Math.max(...person.parents.map((pid) => setLevel(pid))) + 1;
     return level[id];
   }
+
   people.forEach((p) => setLevel(p.id));
+
+  // Keep spouses on the same generation row so married pairs render side-by-side.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    people.forEach((p) => {
+      p.spouses.forEach((sid) => {
+        if (level[sid] === undefined) return;
+        const target = Math.max(level[p.id], level[sid]);
+        if (level[p.id] !== target) {
+          level[p.id] = target;
+          changed = true;
+        }
+        if (level[sid] !== target) {
+          level[sid] = target;
+          changed = true;
+        }
+      });
+    });
+  }
+
   return level;
 }
 
@@ -138,6 +161,35 @@ function renderGraph() {
     line.setAttribute("stroke", "#8c6239"); line.setAttribute("stroke-width", "2"); line.setAttribute("stroke-dasharray", "6 5");
     svg.appendChild(line);
   }));
+
+
+  // Sibling lines (single solid lines): connect siblings sharing at least one parent.
+  const siblingPairs = new Set();
+  people.forEach((p) => {
+    p.parents.forEach((pid) => {
+      const parent = people.find((x) => x.id === pid);
+      if (!parent) return;
+      parent.children.forEach((cid) => {
+        if (cid === p.id) return;
+        const key = [p.id, cid].sort().join("::");
+        siblingPairs.add(key);
+      });
+    });
+  });
+
+  siblingPairs.forEach((key) => {
+    const [aId, bId] = key.split("::");
+    const a = pos[aId], b = pos[bId];
+    if (!a || !b || a.y !== b.y) return;
+    const line = document.createElementNS(svg.namespaceURI, "line");
+    line.setAttribute("x1", a.x + nodeW / 2);
+    line.setAttribute("y1", a.y + nodeH + 8);
+    line.setAttribute("x2", b.x + nodeW / 2);
+    line.setAttribute("y2", b.y + nodeH + 8);
+    line.setAttribute("stroke", "#d4af37");
+    line.setAttribute("stroke-width", "1.8");
+    svg.appendChild(line);
+  });
 
   people.forEach((p) => {
     const { x, y } = pos[p.id];
