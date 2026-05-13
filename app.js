@@ -26,6 +26,7 @@ const editImage = document.getElementById("editImage");
 const deletePersonBtn = document.getElementById("deletePersonBtn");
 
 const labelFor = (p) => `${p.name} [${p.gender}]`;
+const areSiblings = (a, b) => a.parents.some((pid) => b.parents.includes(pid));
 
 function option(el, value, text) { const o = document.createElement("option"); o.value = value; o.textContent = text; el.appendChild(o); }
 
@@ -120,6 +121,30 @@ function computeLevels(people) {
   return level;
 }
 
+
+function orderRow(arr) {
+  const byId = new Map(arr.map((p) => [p.id, p]));
+  const used = new Set();
+  const ordered = [];
+
+  arr.forEach((p) => {
+    if (used.has(p.id)) return;
+    const spouse = p.spouses.map((sid) => byId.get(sid)).find(Boolean);
+    if (spouse && !used.has(spouse.id)) {
+      const pair = [p, spouse];
+      if (pair[0].gender === "Male" && pair[1].gender === "Female") pair.reverse();
+      ordered.push(...pair);
+      used.add(pair[0].id);
+      used.add(pair[1].id);
+    } else {
+      ordered.push(p);
+      used.add(p.id);
+    }
+  });
+
+  return ordered;
+}
+
 function renderGraph() {
   treeGraph.innerHTML = "";
   const people = state.trees[state.activeTree]?.people || [];
@@ -139,7 +164,7 @@ function renderGraph() {
     const total = arr.length * nodeW + (arr.length - 1) * gapX;
     let x = (width - total) / 2;
     const y = margin + Number(lvl) * (nodeH + gapY);
-    arr.forEach((p) => { pos[p.id] = { x, y }; x += nodeW + gapX; });
+    orderRow(arr).forEach((p) => { pos[p.id] = { x, y }; x += nodeW + gapX; });
   });
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -245,11 +270,15 @@ personForm.addEventListener("submit", async (e) => {
 
   if (relType === "spouse" && spouseTarget.value) {
     const partner = people.find((p) => p.id === spouseTarget.value);
-    if (partner) { person.spouses.push(partner.id); partner.spouses.push(person.id); }
+    if (partner) {
+      if (areSiblings(person, partner)) { people.pop(); return alert("Sibling relation cannot be marked as spouse."); }
+      person.spouses.push(partner.id);
+      partner.spouses.push(person.id);
+    }
   }
   if (relType === "child") {
     const mother = people.find((p) => p.id === motherTarget.value), father = people.find((p) => p.id === fatherTarget.value);
-    if (!mother || !father || mother.id === father.id) { people.pop(); return alert("Child requires both mother and father."); }
+    if (!mother || !father || mother.id === father.id || areSiblings(mother, father)) { people.pop(); return alert("Child requires two different non-sibling parents."); }
     person.parents.push(mother.id, father.id); mother.children.push(person.id); father.children.push(person.id);
     if (!mother.spouses.includes(father.id)) mother.spouses.push(father.id);
     if (!father.spouses.includes(mother.id)) father.spouses.push(mother.id);
