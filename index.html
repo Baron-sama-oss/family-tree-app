@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynasty Family Tree Builder</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Dynasty Family Tree Builder</h1>
+    <p>Craft multiple family lineages with portraits and relationship bonds.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Create / Select Tree</h2>
+      <div class="row">
+        <input id="treeName" type="text" placeholder="Tree name (e.g., House Eldridge)" />
+        <button id="createTreeBtn">Create Tree</button>
+      </div>
+      <div class="row">
+        <label for="treeSelect">Active Tree:</label>
+        <select id="treeSelect"></select>
+        <button id="saveTreeBtn" type="button">Save Tree Permanently</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Add Individual</h2>
+      <form id="personForm">
+        <div class="grid">
+          <label>Name<input id="personName" type="text" required /></label>
+          <label>Family Name<input id="personFamily" type="text" placeholder="e.g., Cruz / Young" required /></label>
+          <label>
+            Gender
+            <select id="personGender" required>
+              <option value="">Choose gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>
+            Relation Type
+            <select id="relationType" required>
+              <option value="root">Root person</option>
+              <option value="spouse">Spouse</option>
+              <option value="child">Child</option>
+              <option value="brother">Brother</option>
+              <option value="sister">Sister</option>
+            </select>
+          </label>
+          <label id="spouseLabel">Spouse Of<select id="spouseTarget"></select></label>
+          <label id="motherLabel">Mother (Female)<select id="motherTarget"></select></label>
+          <label id="fatherLabel">Father (Male)<select id="fatherTarget"></select></label>
+          <label id="brotherLabel">Brother Target (Male)<select id="brotherTarget"></select></label>
+          <label id="sisterLabel">Sister Target (Female)<select id="sisterTarget"></select></label>
+          <label>Portrait<input id="personImage" type="file" accept="image/*" /></label>
+        </div>
+        <button type="submit">Add to Tree</button>
+      </form>
+    </section>
+
+
+
+    <section class="panel">
+      <h2>Edit / Remove Individual</h2>
+      <form id="editForm">
+        <div class="grid">
+          <label>Person<select id="editPersonSelect"></select></label>
+          <label>Name<input id="editName" type="text" /></label>
+          <label>Family Name<input id="editFamily" type="text" /></label>
+          <label>
+            Gender
+            <select id="editGender">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>Replace Portrait<input id="editImage" type="file" accept="image/*" /></label>
+        </div>
+        <div class="row">
+          <button type="submit">Save Changes</button>
+          <button type="button" id="deletePersonBtn">Remove Person</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel graph-panel">
+      <h2>Graphical Family Tree</h2>
+      <div id="treeGraph" class="tree-graph"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
